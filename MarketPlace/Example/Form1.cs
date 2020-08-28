@@ -4,6 +4,7 @@ using PedZap.Enum;
 using PedZap.Service;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -35,7 +36,21 @@ namespace Example
         private void Form1_Load(object sender, EventArgs e)
         {
             //Verifica se existe o arquivo de configuração
-            using (StreamReader sr = new StreamReader(@"C:\MarketPlace.json"))
+            const string pathConfig = "Config";
+            const string file = "MarketPlace.json";
+            string path = Path.Combine(Application.StartupPath, pathConfig);
+            string fullPath = Path.Combine(Application.StartupPath, pathConfig, file);
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+            if (!File.Exists(fullPath))
+            {
+                string jsonResult = JsonConvert.SerializeObject(new MarketPlaceConfig());
+                using (StreamWriter fileResult = new StreamWriter(fullPath,true))
+                {
+                    fileResult.WriteLine(jsonResult.ToString());
+                    fileResult.Close();
+                }
+            }
+            using (StreamReader sr = new StreamReader(fullPath))
             {
                 string fileJson = sr.ReadToEnd();
                 if (!string.IsNullOrEmpty(fileJson))
